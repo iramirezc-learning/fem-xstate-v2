@@ -52,14 +52,19 @@ const machine = {
   },
 };
 
-function machineTransition(state = initialState, event) {
-  const nextState = machine.states[state.value]?.on[event.type];
+function machineTransition(
+  state = {
+    value: machine.initial,
+  },
+  event
+) {
+  const nextStateValue = machine.states[state.value].on?.[event.type];
 
-  if (!nextState) {
+  if (!nextStateValue) {
     return state;
   }
 
-  return { ...state, value: nextState };
+  return { ...state, value: nextStateValue };
 }
 
 window.machineTransition = machineTransition;
