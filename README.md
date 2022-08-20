@@ -4,15 +4,14 @@ Personal repository for the course [State Machines in JavaScript with xState (v2
 
 ## Course Details
 
-👾 **Platform:** [Frontend Masters](https://frontendmasters.com/)
-👨🏻‍💻 **Instructor:** [David Khourshid](https://twitter.com/davidkpiano)
-🎓 **Course Level:** Expert
-⏳ **Course Duration:** 4 hours, 8 minutes
-📅 **Published On:** Dec 21, 2021
-
-🏁 **Started On:** Ago 20, 2022
-✅ **Completed On:** ???
-🍅 **Focus Time:** ???
+- 👾 **Platform:** [Frontend Masters](https://frontendmasters.com/)
+- 👨🏻‍💻 **Instructor:** [David Khourshid](https://twitter.com/davidkpiano)
+- 🎓 **Course Level:** Expert
+- ⏳ **Course Duration:** 4 hours, 8 minutes
+- 📅 **Published On:** Dec 21, 2021
+- 🏁 **Started On:** Ago 20, 2022
+- ✅ **Completed On:** ???
+- 🍅 **Focus Time:** ???
 
 ## Course Resources
 
@@ -20,4 +19,4 @@ Personal repository for the course [State Machines in JavaScript with xState (v2
 
 ## Course Notes
 
-- [Notion](https://www.notion.so/iramirezc/State-Machines-in-JavaScript-with-XState-v2-bfdba75a4909406d96ecc130c98121cd)
+- [iramirezc | Notion](https://www.notion.so/iramirezc/State-Machines-in-JavaScript-with-XState-v2-bfdba75a4909406d96ecc130c98121cd)
