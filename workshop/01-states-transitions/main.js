@@ -1,31 +1,33 @@
-// @ts-check
+// @ts-nocheck
 import "../style.css";
 import { createMachine, assign, interpret, send } from "xstate";
 import elements from "../utils/elements";
 
 import { inspect } from "@xstate/inspect";
 
-// inspect({
-//   iframe: false,
-//   url: 'https://stately.ai/viz?inspect',
-// });
+// With the inspector the page reloads with every change.
+// it is kind of annoying.
+inspect({
+  iframe: false,
+  url: "https://stately.ai/viz?inspect",
+});
 
 const playerMachine = createMachine({
   initial: "loading",
   states: {
     loading: {
       on: {
-        LOADED: "playing",
+        LOADED: { target: "playing" },
       },
     },
     playing: {
       on: {
-        PAUSE: "paused",
+        PAUSE: { target: "paused" },
       },
     },
     paused: {
       on: {
-        PLAY: "playing",
+        PLAY: { target: "playing" },
       },
     },
   },
@@ -42,12 +44,12 @@ elements.elPauseButton?.addEventListener("click", () => {
 
 service.subscribe((state) => {
   console.log(state);
-  // @ts-ignore
+
   elements.elLoadingButton.hidden = !state.matches("loading");
-  // @ts-ignore
   elements.elPlayButton.hidden = !state.can({ type: "PLAY" });
-  // @ts-ignore
   elements.elPauseButton.hidden = !state.can({ type: "PAUSE" });
 });
 
 service.send({ type: "LOADED" });
+
+window.service = service;
