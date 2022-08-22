@@ -1,57 +1,83 @@
-// @ts-check
-import '../style.css';
-import { createMachine, assign, interpret, send } from 'xstate';
-import elements from '../utils/elements';
-import { raise } from 'xstate/lib/actions';
-import { formatTime } from '../utils/formatTime';
+// @ts-no-check
+import "../style.css";
+import { createMachine, assign, interpret, send } from "xstate";
+import elements from "../utils/elements";
+import { raise } from "xstate/lib/actions";
+import { formatTime } from "../utils/formatTime";
+
+let intervalId;
+
+const songs = [
+  {
+    title: "Father Ocean",
+    artist: "Monolink",
+    duration: 357, // 5:57
+  },
+  {
+    title: "Gravity",
+    artist: "Boris Brejcha",
+    duration: 216, // 3:36
+  },
+  {
+    title: "Dreamers",
+    artist: "Space Motion",
+    duration: 404, // 6:44
+  },
+];
 
 const playerMachine = createMachine({
-  initial: 'loading',
+  initial: "loading",
   context: {
     // Add initial context here for:
     // title, artist, duration, elapsed, likeStatus, volume
+    title: "",
+    artist: "",
+    duration: 0,
+    elapsed: 0,
+    likeStatus: "unliked",
+    volume: 0,
   },
   states: {
     loading: {
       on: {
         LOADED: {
-          actions: 'assignSongData',
-          target: 'playing',
+          actions: "assignSongData",
+          target: "playing",
         },
       },
     },
     paused: {
       on: {
-        PLAY: { target: 'playing' },
+        PLAY: { target: "playing" },
       },
     },
     playing: {
-      entry: 'playAudio',
-      exit: 'pauseAudio',
+      entry: "playAudio",
+      exit: "pauseAudio",
       on: {
-        PAUSE: { target: 'paused' },
+        PAUSE: { target: "paused" },
       },
     },
   },
   on: {
     SKIP: {
-      actions: 'skipSong',
-      target: 'loading',
+      actions: "skipSong",
+      target: "loading",
     },
     LIKE: {
-      actions: 'likeSong',
+      actions: "likeSong",
     },
     UNLIKE: {
-      actions: 'unlikeSong',
+      actions: "unlikeSong",
     },
     DISLIKE: {
-      actions: ['dislikeSong', raise('SKIP')],
+      actions: ["dislikeSong", raise("SKIP")],
     },
     VOLUME: {
-      actions: 'assignVolume',
+      actions: "assignVolume",
     },
-    'AUDIO.TIME': {
-      actions: 'assignTime',
+    "AUDIO.TIME": {
+      actions: "assignTime",
     },
   },
 }).withConfig({
@@ -68,15 +94,23 @@ const playerMachine = createMachine({
       //   }
       // }
       // Also, reset the `elapsed` and `likeStatus` values.
+      title: (_, evt) => evt.data.title,
+      artist: (_, evt) => evt.data.artist,
+      duration: (_, evt) => evt.data.duration,
+      elapsed: 0,
+      likeStatus: "unliked",
     }),
     likeSong: assign({
       // Assign the `likeStatus` to "liked"
+      likeStatus: "liked",
     }),
     unlikeSong: assign({
       // Assign the `likeStatus` to 'unliked',
+      likeStatus: "unliked",
     }),
     dislikeSong: assign({
       // Assign the `likeStatus` to 'disliked',
+      likeStatus: "disliked",
     }),
     assignVolume: assign({
       // Assign the `volume` to the `level` from the event.
@@ -85,6 +119,17 @@ const playerMachine = createMachine({
       //   type: 'VOLUME',
       //   level: 5
       // }
+      volume: (ctx, evt) => {
+        console.log("Assigning volume...");
+
+        if (ctx.volume < 10) {
+          return ctx.volume + evt.level;
+        }
+
+        console.log("MAX volume!");
+
+        return ctx.volume;
+      },
     }),
     assignTime: assign({
       // Assign the `elapsed` value to the `currentTime` from the event.
@@ -93,51 +138,98 @@ const playerMachine = createMachine({
       //   type: 'AUDIO.TIME',
       //   currentTime: 10
       // }
+      elapsed: (ctx, evt) => {
+        console.log("Assigning time...");
+
+        if (ctx.elapsed + evt.currentTime < ctx.duration) {
+          return ctx.elapsed + evt.currentTime;
+        } else {
+          ctx.elapsed;
+        }
+      },
     }),
     skipSong: () => {
-      console.log('Skipping song');
+      console.log("Skipping song...");
+
+      if (songs.length) {
+        setTimeout(
+          () =>
+            service.send({
+              type: "LOADED",
+              data: songs.pop(),
+            }),
+          1000
+        );
+      } else {
+        console.log("No more songs!");
+      }
     },
-    playAudio: () => {},
-    pauseAudio: () => {},
+    playAudio: () => {
+      console.log("Playing audio...");
+
+      intervalId = setInterval(() => {
+        // TODO: how to read from context when rasing an event?
+        // TODO: why raise does not work in this case?
+        service.send({ type: "AUDIO.TIME", currentTime: 1 });
+      }, 1000);
+    },
+    pauseAudio: () => {
+      console.log("Pausing audio...");
+
+      clearInterval(intervalId);
+    },
   },
 });
 
 const service = interpret(playerMachine).start();
+
 window.service = service;
 
-elements.elPlayButton.addEventListener('click', () => {
-  service.send({ type: 'PLAY' });
+elements.elPlayButton.addEventListener("click", () => {
+  service.send({ type: "PLAY" });
 });
-elements.elPauseButton.addEventListener('click', () => {
-  service.send({ type: 'PAUSE' });
+elements.elPauseButton.addEventListener("click", () => {
+  service.send({ type: "PAUSE" });
 });
-elements.elSkipButton.addEventListener('click', () => {
-  service.send({ type: 'SKIP' });
+elements.elSkipButton.addEventListener("click", () => {
+  service.send({ type: "SKIP" });
 });
-elements.elLikeButton.addEventListener('click', () => {
-  service.send({ type: 'LIKE' });
+elements.elLikeButton.addEventListener("click", () => {
+  const likeStatus = elements.elLikeButton.dataset.likeStatus;
+
+  if ("unliked" === likeStatus) {
+    service.send({ type: "LIKE" });
+  } else if ("liked" === likeStatus) {
+    service.send({ type: "UNLIKE" });
+  }
 });
-elements.elDislikeButton.addEventListener('click', () => {
-  service.send({ type: 'DISLIKE' });
+elements.elDislikeButton.addEventListener("click", () => {
+  service.send({ type: "DISLIKE" });
+});
+elements.elVolumeButton.addEventListener("click", () => {
+  service.send({ type: "VOLUME", level: 2 });
 });
 
 service.subscribe((state) => {
-  console.log(state.context);
+  console.log("event->", state.event);
+  console.log("actions->", state.actions);
+  console.log("context->", state.context);
+
   const { context } = state;
 
-  elements.elLoadingButton.hidden = !state.hasTag('loading');
-  elements.elPlayButton.hidden = !state.can({ type: 'PLAY' });
-  elements.elPauseButton.hidden = !state.can({ type: 'PAUSE' });
+  elements.elLoadingButton.hidden = !state.matches("loading");
+  elements.elPlayButton.hidden = !state.can({ type: "PLAY" });
+  elements.elPauseButton.hidden = !state.can({ type: "PAUSE" });
   elements.elVolumeButton.dataset.level =
     context.volume === 0
-      ? 'zero'
+      ? "zero"
       : context.volume <= 2
-      ? 'low'
-      : context.volume >= 8
-      ? 'high'
+      ? "low"
+      : context.volume >= 6
+      ? "high"
       : undefined;
 
-  elements.elScrubberInput.setAttribute('max', context.duration);
+  elements.elScrubberInput.setAttribute("max", context.duration);
   elements.elScrubberInput.value = context.elapsed;
   elements.elElapsedOutput.innerHTML = formatTime(
     context.elapsed - context.duration
@@ -148,11 +240,11 @@ service.subscribe((state) => {
   elements.elTitle.innerHTML = context.title;
 });
 
-service.send({
-  type: 'LOADED',
-  data: {
-    title: 'Some song title',
-    artist: 'Some song artist',
-    duration: 100,
-  },
-});
+setTimeout(
+  () =>
+    service.send({
+      type: "LOADED",
+      data: songs.pop(),
+    }),
+  1500
+);
