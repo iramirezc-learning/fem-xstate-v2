@@ -11,17 +11,17 @@ const songs = [
   {
     title: "Father Ocean",
     artist: "Monolink",
-    duration: 357, // 5:57
+    duration: 5, // 357, // 5:57
   },
   {
     title: "Gravity",
     artist: "Boris Brejcha",
-    duration: 216, // 3:36
+    duration: 5, // 216, // 3:36
   },
   {
     title: "Dreamers",
     artist: "Space Motion",
-    duration: 404, // 6:44
+    duration: 5, // 404, // 6:44
   },
 ];
 
@@ -131,22 +131,34 @@ const playerMachine = createMachine({
         return ctx.volume;
       },
     }),
-    assignTime: assign({
+    assignTime: assign((ctx, evt) => {
       // Assign the `elapsed` value to the `currentTime` from the event.
       // Assume the event looks like this:
       // {
       //   type: 'AUDIO.TIME',
       //   currentTime: 10
       // }
-      elapsed: (ctx, evt) => {
-        console.log("Assigning time...");
+      console.log("Assigning time...");
 
-        if (ctx.elapsed + evt.currentTime < ctx.duration) {
-          return ctx.elapsed + evt.currentTime;
-        } else {
-          ctx.elapsed;
-        }
-      },
+      let elapsed = ctx.elapsed;
+
+      if (elapsed + evt.currentTime <= ctx.duration) {
+        elapsed += evt.currentTime;
+      } else {
+        // NOTE: There should be a better way to do this.
+        console.log("Song is over!");
+
+        // Again, this is now working, how to "raise" events inside actions?
+        // raise("SKIP");
+
+        service.send({ type: "SKIP" });
+
+        return;
+      }
+
+      return {
+        elapsed,
+      };
     }),
     skipSong: () => {
       console.log("Skipping song...");
