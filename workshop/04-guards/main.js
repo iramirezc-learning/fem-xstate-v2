@@ -88,8 +88,8 @@ const playerMachine = createMachine({
     VOLUME: {
       // Make sure the volume can only be assigned if the level is
       // within range (between 0 and 10)
-      actions: "assignVolume",
       cond: "isVolumeValid",
+      actions: "assignVolume",
     },
     "AUDIO.TIME": {
       actions: "assignTime",
@@ -149,7 +149,7 @@ const playerMachine = createMachine({
     isSongFinished: (ctx) => ctx.elapsed >= ctx.duration,
     isVolumeValid: (_, event) => {
       console.log("isValidVolume...");
-      return event.level >= 0 && event.level <= 10;
+      return 0 <= event.level && event.level <= 10;
     },
   },
 });
