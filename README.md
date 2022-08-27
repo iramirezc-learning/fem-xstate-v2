@@ -10,8 +10,8 @@ Personal repository for the course [State Machines in JavaScript with xState (v2
 - ⏳ **Course Duration:** 4 hours, 8 minutes
 - 📅 **Published On:** Dec 21, 2021
 - 🏁 **Started On:** Ago 20, 2022
-- ✅ **Completed On:** ???
-- 🍅 **Focus Time:** ???
+- ✅ **Completed On:** Ago 27, 2022
+- 🍅 **Focus Time:** 13 hours, 20 minutes (32)
 
 ## Course Resources
 
