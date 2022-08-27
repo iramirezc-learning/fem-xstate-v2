@@ -5,6 +5,12 @@ import { createMachine, assign, interpret, send } from "xstate";
 import elements from "../utils/elements";
 import { raise } from "xstate/lib/actions";
 import { formatTime } from "../utils/formatTime";
+import { inspect } from "@xstate/inspect";
+
+inspect({
+  iframe: false,
+  url: "https://stately.ai/viz?inspect",
+});
 
 const playerMachine = createMachine({
   context: {
@@ -142,7 +148,7 @@ const playerMachine = createMachine({
   },
 });
 
-const service = interpret(playerMachine).start();
+const service = interpret(playerMachine, { devTools: true }).start();
 window.service = service;
 
 elements.elPlayButton.addEventListener("click", () => {
